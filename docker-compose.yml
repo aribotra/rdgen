@@ -7,7 +7,7 @@ services:
     environment:
       SECRET_KEY: "django-insecure-!(t-!f#6g#sr%yfded9(xha)g+=!6craeez^cp+*&bz_7vdk61"
       GHUSER: "aribotra"
-      GHBEARER: "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"
+      GHBEARER: "${GHBEARER}"
       GENURL: "http://PRA65:8000"
       ZIP_PASSWORD: ""
       GHBRANCH: "master"
