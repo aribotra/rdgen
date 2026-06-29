@@ -628,7 +628,7 @@ jobs:
 
   cleanup:
     needs: [build-for-windows-flutter]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     continue-on-error: true
     if: always()
     steps:

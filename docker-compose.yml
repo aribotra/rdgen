@@ -9,11 +9,12 @@ services:
       GHUSER: "aribotra"
       GHBEARER: "${GHBEARER}"
       GENURL: "http://PRA65:8000"
-      ZIP_PASSWORD: ""
+      ZIP_PASSWORD: "Ribas2026+"
       GHBRANCH: "master"
       PROTOCOL: "http"
       REPONAME: "rdgen"
       SH_SECRET: ""
+      DEBUG: "True"
     ports:
       - "8000:8000"
     dns:
