@@ -319,14 +319,32 @@ def generator_view(request):
             try:
                 response = requests.post(url, json=data, headers=headers)
                 #print(response)
-                if response.status_code == 204 or response.status_code == 200:
+                if response.status_code == 204:
+                    new_github_run.status = "in_progress"
+                    new_github_run.save()
+
+                    return render(request, 'waiting.html', {
+                        'filename': filename,
+                        'uuid': myuuid,
+                        'status': "Starting generator...please wait",
+                        'platform': platform,
+                        'log_url': f"https://github.com/{_settings.GHUSER}/{_settings.REPONAME}/actions"
+                    })
+
+                elif response.status_code == 200:
                     github_data = response.json()
                     print(github_data)
                     new_github_run.github_run_id = github_data.get('workflow_run_id')
                     new_github_run.status = "in_progress"
                     new_github_run.save()
 
-                    return render(request, 'waiting.html', {'filename':filename, 'uuid':myuuid, 'status':"Starting generator...please wait", 'platform':platform, 'log_url': github_data.get('html_url')})
+                    return render(request, 'waiting.html', {
+                        'filename': filename,
+                        'uuid': myuuid,
+                        'status': "Starting generator...please wait",
+                        'platform': platform,
+                        'log_url': github_data.get('html_url')
+                    })
                 else:
                     #new_github_run.delete()
                     return JsonResponse({"error": "GitHub rejected the start request"}, status=500)
