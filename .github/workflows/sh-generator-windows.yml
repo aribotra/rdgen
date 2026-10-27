@@ -85,6 +85,11 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Save local patches
+        shell: powershell
+        run: |
+          Copy-Item ".github\patches" "$env:RUNNER_TEMP\rdgen-patches" -Recurse -Force
         
       - uses: actions/download-artifact@v4
         with:
@@ -258,13 +263,12 @@ jobs:
         with:
           timeout_minutes: 1
           max_attempts: 3
-          shell: pwsh
+          shell: powershell
           command: |
-            Invoke-WebRequest -Uri https://raw.githubusercontent.com/bryangerlach/rdgen/refs/heads/master/.github/patches/allowCustom.py -OutFile allowCustom.py
+            Copy-Item "$env:RUNNER_TEMP\rdgen-patches\allowCustom.py" -Destination "allowCustom.py" -Force
             python allowCustom.py
-            # Remove Setup Server Tip
-            Invoke-WebRequest -Uri https://raw.githubusercontent.com/bryangerlach/rdgen/refs/heads/master/.github/patches/removeSetupServerTip.diff -OutFile removeSetupServerTip.diff
-            git apply removeSetupServerTip.diff  
+            Copy-Item "$env:RUNNER_TEMP\rdgen-patches\removeSetupServerTip.diff" -Destination "removeSetupServerTip.diff" -Force
+            git apply removeSetupServerTip.diff
           
       - name: magick stuff
         if: ${{ env.iconlink_url != 'false' }}
@@ -272,7 +276,7 @@ jobs:
         with:
           timeout_minutes: 1
           max_attempts: 3
-          shell: pwsh
+          shell: powershell
           command: |
             Invoke-WebRequest -Uri ${{ env.iconlink_url }}/get_png?filename=${{ env.iconlink_file }}"&"uuid=${{ env.iconlink_uuid }} -OutFile ./res/iconx.png 
             mv ./res/icon.ico ./res/icon.ico.bak
@@ -314,10 +318,10 @@ jobs:
         with:
           timeout_minutes: 1
           max_attempts: 3
-          shell: pwsh
+          shell: powershell
           continue_on_error: true
           command: |
-            Invoke-WebRequest -Uri https://raw.githubusercontent.com/bryangerlach/rdgen/refs/heads/master/.github/patches/cycle_monitor.diff -OutFile cycle_monitor.diff
+            Copy-Item "$env:RUNNER_TEMP\rdgen-patches\cycle_monitor.diff" -Destination "cycle_monitor.diff" -Force
             git apply cycle_monitor.diff
 
       - name: use X for offline display instead of orange circle
@@ -326,10 +330,10 @@ jobs:
         with:
           timeout_minutes: 1
           max_attempts: 3
-          shell: pwsh
+          shell: powershell
           continue_on_error: true
           command: |
-            Invoke-WebRequest -Uri https://raw.githubusercontent.com/bryangerlach/rdgen/refs/heads/master/.github/patches/xoffline.diff -OutFile xoffline.diff
+            Copy-Item "$env:RUNNER_TEMP\rdgen-patches\xoffline.diff" -Destination "xoffline.diff" -Force
             git apply xoffline.diff
 
       - name: removeNewVersionNotif
@@ -403,7 +407,7 @@ jobs:
         with:
           timeout_minutes: 1
           max_attempts: 3
-          shell: pwsh
+          shell: powershell
           continue_on_error: true
           command: |
             Invoke-WebRequest -Uri ${{ env.logolink_url }}/get_png?filename=${{ env.logolink_file }}"&"uuid=${{ env.logolink_uuid }} -OutFile ./rustdesk/data/flutter_assets/assets/logo.png
@@ -433,7 +437,7 @@ jobs:
       
       - name: zip dlls
         continue-on-error: true
-        shell: pwsh
+        shell: powershell
         run: |
           Compress-Archive -Path ./rustdesk/*.dll, ./rustdesk/*.exe -DestinationPath ./rustdesk/unsigned_files.zip -CompressionLevel Fastest
 
@@ -453,7 +457,7 @@ jobs:
 
       - name: unzip dlls
         continue-on-error: true
-        shell: pwsh
+        shell: powershell
         run: |
           Expand-Archive -Path ./rustdesk/signed_files.zip -DestinationPath ./rustdesk/ -Force
           Remove-Item ./rustdesk/unsigned_files.zip
@@ -496,7 +500,7 @@ jobs:
 
       - name: zip exe and msi
         continue-on-error: true
-        shell: pwsh
+        shell: powershell
         run: |
           Compress-Archive -Path ./SignOutput/*.exe, ./SignOutput/*.msi -DestinationPath ./SignOutput/unsigned_files.zip -CompressionLevel Fastest
 
@@ -516,7 +520,7 @@ jobs:
 
       - name: unzip exe and msi
         continue-on-error: true
-        shell: pwsh
+        shell: powershell
         run: |
           Expand-Archive -Path ./SignOutput/signed_files.zip -DestinationPath ./SignOutput/ -Force
           Remove-Item ./SignOutput/unsigned_files.zip
