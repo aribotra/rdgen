@@ -170,6 +170,12 @@ jobs:
           "LIBCLANG_PATH=C:\Program Files\LLVM\bin" | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
           Test-Path "C:\Program Files\LLVM\bin\libclang.dll"
 
+      - name: Configure vcpkg
+        shell: powershell
+        run: |
+          "VCPKG_ROOT=C:\vcpkg" | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
+          Test-Path "C:\vcpkg\vcpkg.exe"
+
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v2
         with:
@@ -233,7 +239,7 @@ jobs:
           sed -i -e 's|Purslane Ltd|${{ env.compname }}|' ./flutter/lib/desktop/pages/desktop_setting_page.dart
           sed -i -e 's|PURSLANE|${{ env.compname }}|' ./res/msi/preprocess.py
           sed -i -e 's|Purslane Ltd|${{ env.compname }}|' ./res/msi/preprocess.py
-          sed -i -e 's|"Copyright Â© 2025 Purslane Ltd. All rights reserved."|"Copyright Â© 2025 ${{ env.compname }}. All rights reserved."|' ./flutter/windows/runner/Runner.rc
+          sed -i -e 's|"Copyright Ã‚Â© 2025 Purslane Ltd. All rights reserved."|"Copyright Ã‚Â© 2025 ${{ env.compname }}. All rights reserved."|' ./flutter/windows/runner/Runner.rc
           sed -i -e 's|Purslane Ltd|${{ env.compname }}|' ./flutter/windows/runner/Runner.rc
           sed -i -e 's|Purslane Ltd|${{ env.compname }}|' ./Cargo.toml
           sed -i -e 's|Purslane Ltd|${{ env.compname }}|' ./libs/portable/Cargo.toml
