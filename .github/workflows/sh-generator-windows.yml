@@ -156,6 +156,14 @@ jobs:
           "C:\Program Files\Python312\Scripts" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
           & "C:\Program Files\Python312\python.exe" --version
 
+      - name: Set up Rust 1.75
+        shell: powershell
+        run: |
+          "C:\Rust\1.75\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding ascii -Append
+          "CARGO_HOME=$env:RUNNER_TEMP\cargo-home" | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
+          New-Item -ItemType Directory -Path "$env:RUNNER_TEMP\cargo-home" -Force | Out-Null
+          & "C:\Rust\1.75\bin\cargo.exe" --version
+          & "C:\Rust\1.75\bin\rustc.exe" --version
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v2
         with:
