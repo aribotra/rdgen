@@ -375,17 +375,46 @@ jobs:
           cd ..
 
       - name: Build rustdesk
+        shell: powershell
+        env:
+          VCPKG_ROOT: C:\vcpkg
+          LIBCLANG_PATH: C:\Program Files\LLVM\bin
         run: |
           # Windows: build RustDesk
+          $ErrorActionPreference = 'Stop'
+
+          Write-Host "VCPKG_ROOT=$env:VCPKG_ROOT"
+          Write-Host "LIBCLANG_PATH=$env:LIBCLANG_PATH"
+
+          # Check required dependencies
+          if (!(Test-Path "$env:VCPKG_ROOT\installed\x64-windows-static\include\libavutil\pixfmt.h")) {
+              throw "FFmpeg headers not found in vcpkg"
+          }
+
+          if (!(Test-Path "$env:LIBCLANG_PATH\libclang.dll")) {
+              throw "libclang.dll not found"
+          }
+
+          # Build RustDesk
           & "C:\Program Files\Python312\python.exe" .\build.py --portable --hwcodec --flutter --vram --skip-portable-pack
-          mv ./flutter/build/windows/x64/runner/Release ./rustdesk
- 
+
+          if ($LASTEXITCODE -ne 0) {
+              throw "RustDesk compilation failed with exit code $LASTEXITCODE"
+          }
+
+          # Move compiled RustDesk files
+          if (!(Test-Path "./flutter/build/windows/x64/runner/Release")) {
+              throw "RustDesk Release folder not found"
+          }
+
+          Move-Item ./flutter/build/windows/x64/runner/Release ./rustdesk
+
           # Download usbmmidd_v2.zip and extract it to ./rustdesk
           Invoke-WebRequest -Uri https://github.com/rustdesk-org/rdev/releases/download/usbmmidd_v2/usbmmidd_v2.zip -OutFile usbmmidd_v2.zip
           Expand-Archive usbmmidd_v2.zip -DestinationPath . -Force
           Remove-Item -Path usbmmidd_v2\Win32 -Recurse
           Remove-Item -Path "usbmmidd_v2\deviceinstaller64.exe", "usbmmidd_v2\deviceinstaller.exe", "usbmmidd_v2\usbmmidd.bat"
-          mv -Force .\usbmmidd_v2 ./rustdesk   
+          mv -Force .\usbmmidd_v2 ./rustdesk
 
           # Download printer driver files and extract them to ./rustdesk
           try {
@@ -398,6 +427,7 @@ jobs:
             $downloadsum_driver = Get-FileHash -Path rustdesk_printer_driver_v4-1.4.zip -Algorithm SHA256
             $checksum_adapter = (Select-String -Path .\sha256sums -Pattern '^([a-fA-F0-9]{64}) \*printer_driver_adapter\.zip$').Matches.Groups[1].Value
             $downloadsum_adapter = Get-FileHash -Path printer_driver_adapter.zip -Algorithm SHA256
+
             if ($checksum_driver -eq $downloadsum_driver.Hash -and $checksum_adapter -eq $downloadsum_adapter.Hash) {
                 Write-Output "rustdesk_printer_driver_v4-1.4, checksums match, extract the file."
                 Expand-Archive rustdesk_printer_driver_v4-1.4.zip -DestinationPath .
@@ -411,7 +441,7 @@ jobs:
                 Write-Output "printer_driver_adapter.dll, checksums do not match, ignore the file."
             }
           } catch {
-              Write-Host "Ingore the printer driver error."
+              Write-Host "Ignore the printer driver error."
           }
 
       - name: icon stuff
