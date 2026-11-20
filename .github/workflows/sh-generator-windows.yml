@@ -159,7 +159,10 @@ jobs:
       - name: Set up Flutter 3.24.5
         shell: powershell
         run: |
+          $env:Path = "C:\Program Files\Git\cmd;C:\flutter\bin;$env:Path"
+          "C:\Program Files\Git\cmd" | Out-File -FilePath $env:GITHUB_PATH -Encoding ascii -Append
           "C:\flutter\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding ascii -Append
+          git --version
           & "C:\flutter\bin\flutter.bat" --version
       - name: Set up Rust 1.75
         shell: powershell
