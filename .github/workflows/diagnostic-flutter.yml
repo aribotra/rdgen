@@ -1,0 +1,34 @@
+name: Diagnostic Flutter PRA65
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diagnostic:
+    runs-on: self-hosted
+
+    steps:
+      - name: Comprovar Git i Flutter
+        shell: powershell
+        run: |
+          Write-Host "=== USUARI ==="
+          whoami
+
+          Write-Host "=== CONFIGURAR PATH ==="
+          $env:Path = "C:\Program Files\Git\cmd;C:\flutter\bin;$env:Path"
+
+          Write-Host "=== GIT ==="
+          git --version
+
+          Write-Host "=== GIT DINS FLUTTER ==="
+          Set-Location C:\flutter
+          git rev-parse HEAD
+          Write-Host "Codi Git: $LASTEXITCODE"
+
+          Write-Host "=== FLUTTER ==="
+          & "C:\flutter\bin\flutter.bat" --version
+          Write-Host "Codi Flutter: $LASTEXITCODE"
+
+          if ($LASTEXITCODE -ne 0) {
+              exit 1
+          }
